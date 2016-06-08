@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 """An example of how to use models and views in PyQt4.
 Model/view documentation can be found at
 http://doc.qt.nokia.com/latest/model-view-programming.html.
@@ -8,14 +9,15 @@ from PyQt4 import QtGui, QtCore
 from libraries.mainwindow_ui import Ui_MainWindow
 
 import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Qt4Agg')
+import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt4agg import (
     FigureCanvasQTAgg as FigureCanvas,
     NavigationToolbar2QT as NavigationToolbar)
 
 PROG_NAME = 'SISView'
+PROG_COMMENT = 'A tool for a quick visualization of .sis files'
 PROG_VERSION = '0.9'
 
 
@@ -61,6 +63,8 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.currentSis = None
         
         self.setupUi(self)
+        self.tableWidget.setupUi(self)
+        
         self.setWindowTitle(PROG_NAME+' '+PROG_VERSION)
         self.setupToolbar()
         self.rewriteTreeView()
@@ -79,6 +83,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.colormapComboBox = QtGui.QComboBox(self.toolBar)
         self.colormapComboBox.setFont(font)
         self.colormapComboBox.addItems(plt.colormaps())
+        self.colormapComboBox.setCurrentIndex(106)
         self.toolBar.addWidget(self.colormapComboBox)
         self.toolBar.addSeparator()
         self.vminLabel = QtGui.QLabel(self.toolBar)
@@ -101,12 +106,14 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.model = QtGui.QFileSystemModel()
         self.model.setRootPath(QtCore.QDir.rootPath())
         self.treeView.setModel(self.model)
+        self.header = self.treeView.header()
+        self.header.hideSection(1)
+        self.header.setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
         self.treeView.setRootIndex(self.model.index(QtCore.QDir.homePath()))
         pass
     
     def rewritePlotWidget(self,):
-        self.figure0, self.ax0 = plt.subplots(1,1,)#figsize=(6,6))
-        self.ax0.plot(np.random.rand(10))
+        self.figure0, self.ax0 = plt.subplots(1,1, figsize=(18,6))
         self.figure0.set_facecolor('none')
         self.canvas0 = FigureCanvas(self.figure0)
         self.toolbar0 = NavigationToolbar(self.canvas0, self, coordinates=False)
@@ -116,7 +123,6 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.canvas0.draw()
         
         self.figure1, self.ax1 = plt.subplots(1,1,)#figsize=(6,6))
-        self.ax1.plot(np.random.rand(11))
         self.figure1.set_facecolor('none')
         self.canvas1 = FigureCanvas(self.figure1)
         self.toolbar1 = NavigationToolbar(self.canvas1, self, coordinates=False)
@@ -128,7 +134,9 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
     
     def connectActions(self):
         self.actionOpen_Folder.triggered.connect(self.openFolder)
-        self.treeView.doubleClicked.connect(self.openSis)
+        self.treeView.activated.connect(self.openSis)
+        self.treeView.activated.connect(self.openCsv)
+        self.treeView.doubleClicked.connect(self.goToFolder)
         self.colormapComboBox.currentIndexChanged.connect(lambda: self.replot(self.currentSis))
         self.vminDoubleSpinBox.valueChanged.connect(lambda: self.replot(self.currentSis))
         self.vmaxDoubleSpinBox.valueChanged.connect(lambda: self.replot(self.currentSis))
@@ -136,13 +144,28 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.actionToggle1 = self.dockWidget1.toggleViewAction()
         self.menuView.addAction(self.actionToggle0)
         self.menuView.addAction(self.actionToggle1)
+        self.actionInfo.triggered.connect(self.infoBox)
+        self.actionQuit.triggered.connect(QtGui.qApp.quit)
         pass
     
     def openFolder(self,):
         folder = QtGui.QFileDialog.getExistingDirectory(self, caption='Open folder',
                                                         directory=QtCore.QDir.homePath())
         self.treeView.setRootIndex(self.model.index(folder))
-                
+    
+    def goToFolder(self, index):
+        path = self.model.filePath(index)
+        if os.path.isdir(path):
+            self.treeView.setRootIndex(self.model.index(path))
+            
+    def openCsv(self, index):
+        path = self.model.filePath(index)
+        name = os.path.split(path)[1]
+        if os.path.isfile(path) and path.endswith('.csv'):
+            print(path)
+            self.csvLabel.setText('Display CSV: ' + name)
+            self.tableWidget.displayCSV(path)
+
     def openSis(self, index):
         path = self.model.filePath(index)
         if os.path.isfile(path) and path.endswith('.sis'):
@@ -154,20 +177,29 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
             dic = {'cmap': self.colormapComboBox.currentText(),
                    'vmin': self.vminDoubleSpinBox.value(),
                    'vmax': self.vmaxDoubleSpinBox.value(),}
+            print(self.colormapComboBox.currentIndex())
             sis = RawSis(path)
-            self.ax0.cla()
-            self.ax1.cla()
-            self.ax0.imshow(sis.im0, **dic)
-            self.ax1.imshow(sis.im1, **dic)
-            self.canvas0.draw()
-            self.canvas1.draw()
+            name = os.path.split(path)[1]
+            self.im0NameLabel.setText(name + ' - im0')
+            self.im1NameLabel.setText(name + ' - im1')
+            for dock, ax, canvas, im in [(self.dockWidget0, self.ax0, self.canvas0, sis.im0),
+                                         (self.dockWidget1, self.ax1, self.canvas1, sis.im1)]:
+                if dock.isVisible():
+                    ax.cla()              
+                    ax.axis('off')
+                    ax.imshow(im, **dic)            
+                    canvas.draw()
+
         else:
             print('path is None')
+            
+    def infoBox(self,):
+        QtGui.QMessageBox.about(self, PROG_NAME, PROG_COMMENT+'\n v. '+PROG_VERSION)
         
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     main = Main()
-    main.show()
+    main.showMaximized()
     status = app.exec_()
 
     sys.exit(status)

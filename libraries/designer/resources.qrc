@@ -1,9 +1,5 @@
 <RCC>
-  <qresource prefix="basic-ui">
-    <file>icons/111267-basic-ui/svg/left-justification-button.svg</file>
-    <file>icons/111267-basic-ui/svg/eye-close-up.svg</file>
-    <file>icons/111267-basic-ui/svg/wrench-tool.svg</file>
-    <file>icons/111267-basic-ui/svg/refresh-arrow.svg</file>
-    <file>icons/111267-basic-ui/svg/home-button.svg</file>
+  <qresource prefix="icons">
+    <file>lens.png</file>
   </qresource>
 </RCC>
