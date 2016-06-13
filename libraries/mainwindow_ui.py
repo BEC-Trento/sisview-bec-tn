@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Tue Jun  7 15:38:09 2016
+# Created: Fri Jun 10 14:51:19 2016
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -82,19 +82,8 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.dockWidget0.sizePolicy().hasHeightForWidth())
         self.dockWidget0.setSizePolicy(sizePolicy)
         self.dockWidget0.setObjectName(_fromUtf8("dockWidget0"))
-        self.plotWidget0 = QtGui.QWidget()
+        self.plotWidget0 = PlotQWidget()
         self.plotWidget0.setObjectName(_fromUtf8("plotWidget0"))
-        self.plotLayout0 = QtGui.QVBoxLayout(self.plotWidget0)
-        self.plotLayout0.setObjectName(_fromUtf8("plotLayout0"))
-        self.im0NameLabel = QtGui.QLabel(self.plotWidget0)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.im0NameLabel.sizePolicy().hasHeightForWidth())
-        self.im0NameLabel.setSizePolicy(sizePolicy)
-        self.im0NameLabel.setText(_fromUtf8(""))
-        self.im0NameLabel.setObjectName(_fromUtf8("im0NameLabel"))
-        self.plotLayout0.addWidget(self.im0NameLabel)
         self.dockWidget0.setWidget(self.plotWidget0)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.dockWidget0)
         self.dockWidget1 = QtGui.QDockWidget(MainWindow)
@@ -104,19 +93,8 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.dockWidget1.sizePolicy().hasHeightForWidth())
         self.dockWidget1.setSizePolicy(sizePolicy)
         self.dockWidget1.setObjectName(_fromUtf8("dockWidget1"))
-        self.plotWidget1 = QtGui.QWidget()
+        self.plotWidget1 = PlotQWidget()
         self.plotWidget1.setObjectName(_fromUtf8("plotWidget1"))
-        self.plotLayout1 = QtGui.QVBoxLayout(self.plotWidget1)
-        self.plotLayout1.setObjectName(_fromUtf8("plotLayout1"))
-        self.im1NameLabel = QtGui.QLabel(self.plotWidget1)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.im1NameLabel.sizePolicy().hasHeightForWidth())
-        self.im1NameLabel.setSizePolicy(sizePolicy)
-        self.im1NameLabel.setText(_fromUtf8(""))
-        self.im1NameLabel.setObjectName(_fromUtf8("im1NameLabel"))
-        self.plotLayout1.addWidget(self.im1NameLabel)
         self.dockWidget1.setWidget(self.plotWidget1)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.dockWidget1)
         self.actionOpen_Folder = QtGui.QAction(MainWindow)
@@ -153,4 +131,5 @@ class Ui_MainWindow(object):
         self.actionQuit.setShortcut(_translate("MainWindow", "Ctrl+Q", None))
 
 from libraries.csvqtablewidget import CsvQTableWidget
+from libraries.plotqwidget import PlotQWidget
 import resources_rc

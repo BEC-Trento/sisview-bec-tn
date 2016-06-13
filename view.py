@@ -4,17 +4,15 @@ Model/view documentation can be found at
 http://doc.qt.nokia.com/latest/model-view-programming.html.
 """
 import sys, os
-
+import PyQt4
 from PyQt4 import QtGui, QtCore
 from libraries.mainwindow_ui import Ui_MainWindow
 
 import numpy as np
 import matplotlib
+from matplotlib.pyplot import colormaps
 matplotlib.use('Qt4Agg')
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt4agg import (
-    FigureCanvasQTAgg as FigureCanvas,
-    NavigationToolbar2QT as NavigationToolbar)
+
 
 PROG_NAME = 'SISView'
 PROG_COMMENT = 'A tool for a quick visualization of .sis files'
@@ -64,11 +62,13 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         
         self.setupUi(self)
         self.tableWidget.setupUi(self)
+        self.plotWidget0.setupUi(self)
+        self.plotWidget1.setupUi(self)
         
         self.setWindowTitle(PROG_NAME+' '+PROG_VERSION)
         self.setupToolbar()
         self.rewriteTreeView()
-        self.rewritePlotWidget()
+#        self.rewritePlotWidget()
         self.connectActions()
         
     def setupToolbar(self,):
@@ -82,7 +82,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.toolBar.addWidget(self.colormapLabel)
         self.colormapComboBox = QtGui.QComboBox(self.toolBar)
         self.colormapComboBox.setFont(font)
-        self.colormapComboBox.addItems(plt.colormaps())
+        self.colormapComboBox.addItems(colormaps())
         self.colormapComboBox.setCurrentIndex(106)
         self.toolBar.addWidget(self.colormapComboBox)
         self.toolBar.addSeparator()
@@ -111,25 +111,6 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.header.setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
         self.treeView.setRootIndex(self.model.index(QtCore.QDir.homePath()))
         pass
-    
-    def rewritePlotWidget(self,):
-        self.figure0, self.ax0 = plt.subplots(1,1, figsize=(18,6))
-        self.figure0.set_facecolor('none')
-        self.canvas0 = FigureCanvas(self.figure0)
-        self.toolbar0 = NavigationToolbar(self.canvas0, self, coordinates=False)
-        self.toolbar0.setOrientation(QtCore.Qt.Horizontal)
-        self.plotLayout0.addWidget(self.canvas0)
-        self.plotLayout0.addWidget(self.toolbar0)
-        self.canvas0.draw()
-        
-        self.figure1, self.ax1 = plt.subplots(1,1,)#figsize=(6,6))
-        self.figure1.set_facecolor('none')
-        self.canvas1 = FigureCanvas(self.figure1)
-        self.toolbar1 = NavigationToolbar(self.canvas1, self, coordinates=False)
-        self.toolbar1.setOrientation(QtCore.Qt.Horizontal)
-        self.plotLayout1.addWidget(self.canvas1)
-        self.plotLayout1.addWidget(self.toolbar1)
-        self.canvas1.draw()
         
     
     def connectActions(self):
@@ -177,21 +158,15 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
             dic = {'cmap': self.colormapComboBox.currentText(),
                    'vmin': self.vminDoubleSpinBox.value(),
                    'vmax': self.vmaxDoubleSpinBox.value(),}
-            print(self.colormapComboBox.currentIndex())
+            print(self.colormapComboBox.currentText())
             sis = RawSis(path)
             name = os.path.split(path)[1]
-            self.im0NameLabel.setText(name + ' - im0')
-            self.im1NameLabel.setText(name + ' - im1')
-            for dock, ax, canvas, im in [(self.dockWidget0, self.ax0, self.canvas0, sis.im0),
-                                         (self.dockWidget1, self.ax1, self.canvas1, sis.im1)]:
-                if dock.isVisible():
-                    ax.cla()              
-                    ax.axis('off')
-                    ax.imshow(im, **dic)            
-                    canvas.draw()
-
+            for plotw, image in [(self.plotWidget0, sis.im0),
+                                (self.plotWidget1, sis.im1)]:
+                plotw.replot(image, dic, name)
         else:
             print('path is None')
+            
             
     def infoBox(self,):
         QtGui.QMessageBox.about(self, PROG_NAME, PROG_COMMENT+'\n v. '+PROG_VERSION)
