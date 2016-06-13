@@ -8,43 +8,14 @@ import PyQt4
 from PyQt4 import QtCore, QtGui
 
 import numpy as np
-import pyqtgraph as pg
-
 from matplotlib.cm import get_cmap
+
+import pyqtgraph as pg
 
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
 
-class RawSis():
-    
-    def __init__(self, filename, scale=None):
-        
-        im0, im1, im, raw = self.readsis(filename)
-        if scale is not None:
-            self.scale = scale
-        else:
-            self.scale = 2**16/10.0#1.0
-        
-        self.im0 = im0/self.scale
-        self.im1 = im1/self.scale
-        self.im_full  = im/self.scale
-        self.raw = raw/self.scale
-        
-    
-    def readsis(self,filename):
-        f = open(filename, 'rb')  #apre in binario
-        rawdata = np.fromfile(f,'H').astype(int)
-        f.close()
-        
-        width=rawdata[6]  # N cols
-        height=rawdata[5] # N rows
-        #rispetto ad octave, gli indici cambiano (python is 0-based)
-        image = rawdata[-width*height : ]
-        image.resize(height,width)
-        im0 = image[:height//2, :]
-        im1 = image[height//2:, :]
-        
-        return im0, im1, image, rawdata #, image.shape
+
 
 class PlotQWidget(QtGui.QWidget):
     
@@ -67,52 +38,60 @@ class PlotQWidget(QtGui.QWidget):
         self.plotLayout.addWidget(self.nameLabel)
         
 #        self.figure, self.ax = plt.subplots(1,1, figsize=(18,6))
-        self.imv = pg.ImageView()
-
-        self.plotLayout.addWidget(self.imv)
-        
+        self.imView = pg.ImageView()
+        self.histogram = self.imView.getHistogramWidget()
+#        self.histogram.setFixedWidth(100)
+        self.plotLayout.addWidget(self.imView)
         self.setLayout(self.plotLayout)
+        self.setParams()
         
-    def replot(self, image, dic=None, name=None, **kwargs):
+    def setParams(self,):
+        pass
+        
+    def replot(self, image, name=None,):
         if name is not None:
             self.nameLabel.setText(name)
-            levels = (dic['vmin'], dic['vmax'])
-            cmap = get_cmap(dic['cmap'])
+        if self.isVisible():
+            self.imView.setImage(image.T,)
+            
+    def setLevels(self, levels):
+        if self.isVisible():
+            self.imView.setLevels(*levels)
+    
+    def setCmap(self, cmap_name):
+        if self.isVisible():
+            cmap = get_cmap(cmap_name)
             cmap_array = np.array([cmap(j) for j in range(cmap.N)])
             cmap_pg = pg.ColorMap(np.arange(cmap.N)/cmap.N, cmap_array)
-            self.imv.setImage(image.T,)
-            self.imv.setLevels(*levels)
-            self.imv.getHistogramWidget().gradient.setColorMap(cmap_pg)
+            self.histogram.gradient.setColorMap(cmap_pg)
 
                
          
                
 if __name__ == '__main__':
-    import sys
+    import sys, os
+    from readsis import RawSis
+    
     
     app = QtGui.QApplication(sys.argv)
     
-    file = '/home/carmelo/eos2/data/images/20160330-EoS - Bragg trials-0008.sis'
-    dic = {'vmin': 0, 'vmax': 2.0}
-
-    cmap = get_cmap('gist_stern')
-    cmap_array = np.array([cmap(j) for j in range(cmap.N)])
-    cmap_pg = pg.ColorMap(np.arange(cmap.N)/cmap.N, cmap_array)
-
-    image = RawSis(file).im0.T
+    file = '/home/carmelo/view/data/2015-03-04/images/20150304-data-0008.sis'
+    cmap_name = 'gist_stern'
+    image = RawSis(file).im0
+    levels = (0, 2)
 
     win = QtGui.QMainWindow()
-    imv = pg.ImageView()
-
-    imv.setImage(image)
-    imv.setLevels(0.0, 2.0)
-    imv.getHistogramWidget().gradient.setColorMap(cmap_pg)
-#    imv.updateImage()
-#    imv = pg.image(image)
-#    print(imv)
-#    imv.ui.histogram.gradient.setColorMap(cmap_pg)
+    plotw = PlotQWidget()
+    plotw.setupUi(win)
+    plotw.setVisible(True)
     
-    win.setCentralWidget(imv)
+    print(plotw.histogram.width())
+    plotw.replot(image, os.path.split(file)[1])
+    plotw.setLevels(levels)
+    plotw.setCmap(cmap_name)
+
+    
+    win.setCentralWidget(plotw)
     win.setWindowTitle('pyqtgraph example: ImageViewColor')
     win.show()  #raisethe IndexError
     

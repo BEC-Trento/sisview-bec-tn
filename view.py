@@ -7,6 +7,7 @@ import sys, os
 import PyQt4
 from PyQt4 import QtGui, QtCore
 from libraries.mainwindow_ui import Ui_MainWindow
+from libraries.readsis import RawSis
 
 import numpy as np
 import matplotlib
@@ -23,36 +24,8 @@ PROG_VERSION = '0.9'
 #                         QSplitter, QTreeView)
 #from PyQt4.QtCore import QDir, Qt
 
-class RawSis():
-    
-    def __init__(self, filename, scale=None):
-        
-        im0, im1, im, raw = self.readsis(filename)
-        if scale is not None:
-            self.scale = scale
-        else:
-            self.scale = 2**16/10.0#1.0
-        
-        self.im0 = im0/self.scale
-        self.im1 = im1/self.scale
-        self.im_full  = im/self.scale
-        self.raw = raw/self.scale
-        
-    
-    def readsis(self,filename):
-        f = open(filename, 'rb')  #apre in binario
-        rawdata = np.fromfile(f,'H').astype(int)
-        f.close()
-        
-        width=rawdata[6]  # N cols
-        height=rawdata[5] # N rows
-        #rispetto ad octave, gli indici cambiano (python is 0-based)
-        image = rawdata[-width*height : ]
-        image.resize(height,width)
-        im0 = image[:height//2, :]
-        im1 = image[height//2:, :]
-        
-        return im0, im1, image, rawdata #, image.shape
+ROOT = '/home/carmelo/view/data/'
+
 
 class Main(QtGui.QMainWindow, Ui_MainWindow):
     def __init__(self, ):
@@ -68,7 +41,12 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.setWindowTitle(PROG_NAME+' '+PROG_VERSION)
         self.setupToolbar()
         self.rewriteTreeView()
-#        self.rewritePlotWidget()
+
+#        NO NOT CHANGE ORDER OF INITIALIZATIONS HERE        
+        self.plotWidgetList = [self.plotWidget0, self.plotWidget1]
+        self.setCmap()
+        self.setLevels()
+        
         self.connectActions()
         
     def setupToolbar(self,):
@@ -91,6 +69,8 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.vminLabel.setFont(font)
         self.toolBar.addWidget(self.vminLabel)
         self.vminDoubleSpinBox = QtGui.QDoubleSpinBox(self.toolBar)
+        self.vminDoubleSpinBox.setValue(0)
+        self.vminDoubleSpinBox.setSingleStep(0.1)
         self.toolBar.addWidget(self.vminDoubleSpinBox)
         self.vmaxLabel = QtGui.QLabel(self.toolBar)
         self.vmaxLabel.setText('Vmax')
@@ -98,6 +78,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.toolBar.addWidget(self.vmaxLabel)
         self.vmaxDoubleSpinBox = QtGui.QDoubleSpinBox(self.toolBar)
         self.vmaxDoubleSpinBox.setValue(2.0)
+        self.vmaxDoubleSpinBox.setSingleStep(0.1)
         self.toolBar.addWidget(self.vmaxDoubleSpinBox)
         self.toolBar.addSeparator()
 
@@ -109,7 +90,10 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.header = self.treeView.header()
         self.header.hideSection(1)
         self.header.setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
-        self.treeView.setRootIndex(self.model.index(QtCore.QDir.homePath()))
+        if ROOT is None:
+            self.treeView.setRootIndex(self.model.index(QtCore.QDir.homePath()))
+        else:
+            self.treeView.setRootIndex(self.model.index(ROOT))
         pass
         
     
@@ -118,9 +102,9 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.treeView.activated.connect(self.openSis)
         self.treeView.activated.connect(self.openCsv)
         self.treeView.doubleClicked.connect(self.goToFolder)
-        self.colormapComboBox.currentIndexChanged.connect(lambda: self.replot(self.currentSis))
-        self.vminDoubleSpinBox.valueChanged.connect(lambda: self.replot(self.currentSis))
-        self.vmaxDoubleSpinBox.valueChanged.connect(lambda: self.replot(self.currentSis))
+        self.colormapComboBox.currentIndexChanged.connect(self.setCmap)
+        self.vminDoubleSpinBox.valueChanged.connect(self.setLevels)
+        self.vmaxDoubleSpinBox.valueChanged.connect(self.setLevels)
         self.actionToggle0 = self.dockWidget0.toggleViewAction()
         self.actionToggle1 = self.dockWidget1.toggleViewAction()
         self.menuView.addAction(self.actionToggle0)
@@ -150,22 +134,31 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
     def openSis(self, index):
         path = self.model.filePath(index)
         if os.path.isfile(path) and path.endswith('.sis'):
-            self.currentSis = path
             self.replot(path)
+            if self.currentSis is None:
+                self.setCmap()
+            self.currentSis = path
             
     def replot(self, path):
         if path is not None:
-            dic = {'cmap': self.colormapComboBox.currentText(),
-                   'vmin': self.vminDoubleSpinBox.value(),
-                   'vmax': self.vmaxDoubleSpinBox.value(),}
-            print(self.colormapComboBox.currentText())
             sis = RawSis(path)
             name = os.path.split(path)[1]
-            for plotw, image in [(self.plotWidget0, sis.im0),
-                                (self.plotWidget1, sis.im1)]:
-                plotw.replot(image, dic, name)
+            for plotw, image in zip(self.plotWidgetList, (sis.im0, sis.im1)):
+                plotw.replot(image, name)
+            self.setLevels()
         else:
             print('path is None')
+            
+    def setLevels(self,):
+        levels = (self.vminDoubleSpinBox.value(),
+                self.vmaxDoubleSpinBox.value(),)
+        for plotw in self.plotWidgetList:
+            plotw.setLevels(levels)
+    
+    def setCmap(self,):
+        cmap_name = self.colormapComboBox.currentText()
+        for plotw in self.plotWidgetList:
+            plotw.setCmap(cmap_name)
             
             
     def infoBox(self,):
