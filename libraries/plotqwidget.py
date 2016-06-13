@@ -15,6 +15,14 @@ import pyqtgraph as pg
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
 
+class MyImageView(pg.ImageView):
+    def __init__(self, *args, **kwargs):
+        super(MyImageView, self).__init__(*args, **kwargs)
+        self.ui.menuBtn.setFixedWidth(50)
+        self.ui.roiBtn.setFixedWidth(50)
+        
+        self.roi.setSize(300)
+        pass
 
 
 class PlotQWidget(QtGui.QWidget):
@@ -38,9 +46,9 @@ class PlotQWidget(QtGui.QWidget):
         self.plotLayout.addWidget(self.nameLabel)
         
 #        self.figure, self.ax = plt.subplots(1,1, figsize=(18,6))
-        self.imView = pg.ImageView()
+        self.imView = MyImageView(view=pg.PlotItem())
         self.histogram = self.imView.getHistogramWidget()
-#        self.histogram.setFixedWidth(100)
+
         self.plotLayout.addWidget(self.imView)
         self.setLayout(self.plotLayout)
         self.setParams()
@@ -52,7 +60,7 @@ class PlotQWidget(QtGui.QWidget):
         if name is not None:
             self.nameLabel.setText(name)
         if self.isVisible():
-            self.imView.setImage(image.T,)
+            self.imView.setImage(image.T)
             
     def setLevels(self, levels):
         if self.isVisible():
