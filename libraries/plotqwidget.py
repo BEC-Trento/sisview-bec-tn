@@ -9,10 +9,14 @@ from PyQt4 import QtCore, QtGui
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gs
+
+
 from matplotlib.backends.backend_qt4agg import (
     FigureCanvasQTAgg as FigureCanvas,
     NavigationToolbar2QT as NavigationToolbar)
 
+
+from libraries.roi import ROI
 
 
 class PlotQWidget(QtGui.QWidget):
@@ -22,7 +26,9 @@ class PlotQWidget(QtGui.QWidget):
         
     def setupUi(self, setMainWindow):
         self.mainWindow = setMainWindow
+        self.image = None
         self.lims = None
+        self.roi = None
         
         self.plotLayout = QtGui.QVBoxLayout(self)
         
@@ -37,14 +43,16 @@ class PlotQWidget(QtGui.QWidget):
         
 #        self.figure, self.ax = plt.subplots(1,1, figsize=(18,6))
         self.figure = plt.figure(figsize=(18,6))
-        self.gridspec = gs.GridSpec(2, 2, width_ratios=[1,2], height_ratios=[4,1])
+        self.gridspec = gs.GridSpec(2, 2, width_ratios=[1,4], height_ratios=[4,1])
         self.ax = self.figure.add_subplot(self.gridspec[1])
-        
+        self.ax.axis('off')
+        self.im = self.ax.imshow(np.random.rand(10,10), cmap='gray')
         self.ax_y = self.figure.add_subplot(self.gridspec[0], sharey=self.ax)
-        self.ax_x = self.figure.add_subplot(self.gridspec[3], sharex=self.ax)
-        
-        self.figure.set_facecolor('none')
+        self.ax_x = self.figure.add_subplot(self.gridspec[3], sharex=self.ax)        
+        self.figure.set_facecolor('none')        
         self.canvas = FigureCanvas(self.figure)
+        
+        
         self.toolbar = NavigationToolbar(self.canvas, self, coordinates=False)
         self.toolbar.setOrientation(QtCore.Qt.Horizontal)
         self.plotLayout.addWidget(self.canvas)
@@ -53,35 +61,60 @@ class PlotQWidget(QtGui.QWidget):
         self.setLayout(self.plotLayout)
         self.canvas.draw()
         
+        
     def replot(self, image, dic={}, name=None):
         if name is not None:
             self.nameLabel.setText(name)
+        self.roi = None
+        self.image = image
         if self.isVisible():
             if self.lims is None:
-#                print('lims is None')
-                self.ax.cla()              
-#                self.ax.axis('off')
-                self.im = self.ax.imshow(image, **dic)
+                print('lims is None')
+                self._plotdata(dic)
                 self.lims = (self.ax.get_xlim(), self.ax.get_ylim())
 #                print(self.lims)
             else:
                 self.lims = (self.ax.get_xlim(), self.ax.get_ylim())
-#                print(self.lims)
-#                self.ax.cla()              
-#                self.ax.axis('off')
-                self.im.set_data(image)
-                self.im.set_cmap(dic['cmap'])
-                self.im.norm.vmin = dic['vmin']
-                self.im.norm.vmax = dic['vmax']
+#                print('newlims: ', self.lims)
+#                print(self.ax.get_xlim())
+#                self.ax.set_xlim(0, image.shape[1])
+#                self.ax.set_ylim(image.shape[0], 0)
+                self._plotdata(dic)
                 self.ax.set_xlim(*self.lims[0])
                 self.ax.set_ylim(*self.lims[1])
-            int_x = image.sum(0)
-            int_y = image.sum(1)
-            self.ax_x.cla()
-            self.ax_y.cla()
-            self.ax_x.plot(np.arange(len(int_x)), int_x)
-            self.ax_y.plot(int_y, np.arange(len(int_y)))
+            
+    def _plotdata(self, dic={}):
+        image = self.image
+#        self.im.set_data(image)        
+#        self.im.norm.vmin = dic['vmin']
+#        self.im.norm.vmax = dic['vmax']
+#        self.im.set_cmap(dic['cmap'])
+        self.ax.cla()
+        self.ax.axis('off')
+        self.ax.imshow(image, **dic)
+        self._plot_integrations((slice(None, None), slice(None, None)))
+    
+    def _plot_integrations(self, slices):
+        slice_rows, slice_cols = slices
+        image = self.image[slice_rows, slice_cols]
+        int_x = image.sum(0)
+        int_y = image.sum(1)
+        self.ax_x.cla()
+        self.ax_y.cla()
+        x_start = slice_cols.start if slice_cols.start is not None else 0
+        y_start = slice_rows.start if slice_rows.start is not None else 0
+        self.ax_x.plot(np.arange(len(int_x)) + x_start, int_x)
+        self.ax_y.plot(int_y, np.arange(len(int_y)) + y_start)
+        if self.lims is not None:
+            self.ax.set_xlim(*self.lims[0])
+            self.ax.set_ylim(*self.lims[1])
+        if self.roi is None:
+            self.roi = ROI(self.ax, picker_radius=60)
+            self.roi.signaler.update.connect(self._plot_integrations)
             self.canvas.draw()
+        
+        
+    
 
                
         

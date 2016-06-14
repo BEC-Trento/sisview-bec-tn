@@ -23,6 +23,9 @@ PROG_VERSION = '0.9'
 #                         QSplitter, QTreeView)
 #from PyQt4.QtCore import QDir, Qt
 
+#ROOT = None
+ROOT = '/home/carmelo/eos2/data/'
+
 class RawSis():
     
     def __init__(self, filename, scale=None):
@@ -109,7 +112,10 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.header = self.treeView.header()
         self.header.hideSection(1)
         self.header.setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
-        self.treeView.setRootIndex(self.model.index(QtCore.QDir.homePath()))
+        if ROOT is None:
+            self.treeView.setRootIndex(self.model.index(QtCore.QDir.homePath()))
+        else:
+            self.treeView.setRootIndex(self.model.index(ROOT))
         pass
         
     
