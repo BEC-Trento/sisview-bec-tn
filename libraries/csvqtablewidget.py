@@ -5,7 +5,7 @@ Created on Sun May 24 01:46:57 2015
 
 @author: carmelo
 """
-from PyQt4 import QtCore, QtGui
+from PySide import QtCore, QtGui
 import os, csv
 
 try:

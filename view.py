@@ -4,15 +4,13 @@ Model/view documentation can be found at
 http://doc.qt.nokia.com/latest/model-view-programming.html.
 """
 import sys, os
-import PyQt4
-from PyQt4 import QtGui, QtCore
+from PySide import QtGui, QtCore
 from libraries.mainwindow_ui import Ui_MainWindow
-from libraries.readsis import RawSis
 
 import numpy as np
-import matplotlib
+#import matplotlib
 from matplotlib.pyplot import colormaps
-matplotlib.use('Qt4Agg')
+#matplotlib.use('Qt4Agg')
 
 
 PROG_NAME = 'SISView'
@@ -20,12 +18,40 @@ PROG_COMMENT = 'A tool for a quick visualization of .sis files'
 PROG_VERSION = '0.9'
 
 
-#from PyQt4.QtGui import (QApplication, QColumnView, QFileSystemModel,
-#                         QSplitter, QTreeView)
-#from PyQt4.QtCore import QDir, Qt
+#ROOT = None
+#ROOT = sys.argv[1] if len(sys.argv) > 1 else None
+ROOT = './data'
 
-ROOT = '/home/carmelo/view/data/'
-
+class RawSis():
+    
+    def __init__(self, filename, scale=None):
+        
+        im0, im1, im, raw = self.readsis(filename)
+        if scale is not None:
+            self.scale = scale
+        else:
+            self.scale = 2**16/10.0#1.0
+        
+        self.im0 = im0/self.scale
+        self.im1 = im1/self.scale
+        self.im_full  = im/self.scale
+        self.raw = raw/self.scale
+        
+    
+    def readsis(self,filename):
+        f = open(filename, 'rb')  #apre in binario
+        rawdata = np.fromfile(f,'H').astype(int)
+        f.close()
+        
+        width=rawdata[6]  # N cols
+        height=rawdata[5] # N rows
+        #rispetto ad octave, gli indici cambiano (python is 0-based)
+        image = rawdata[-width*height : ]
+        image.resize(height,width)
+        im0 = image[:height//2, :]
+        im1 = image[height//2:, :]
+        
+        return im0, im1, image, rawdata #, image.shape
 
 class Main(QtGui.QMainWindow, Ui_MainWindow):
     def __init__(self, ):
@@ -41,19 +67,15 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.setWindowTitle(PROG_NAME+' '+PROG_VERSION)
         self.setupToolbar()
         self.rewriteTreeView()
-
-#        NO NOT CHANGE ORDER OF INITIALIZATIONS HERE        
-        self.plotWidgetList = [self.plotWidget0, self.plotWidget1]
         self.setCmap()
-        self.setLevels()
-        
+#        self.rewritePlotWidget()
         self.connectActions()
         
     def setupToolbar(self,):
         font = QtGui.QFont()
         font.setPointSize(10)
         self.toolBar.setFont(font)
-        self.toolBar.setStyleSheet('QToolBar{spacing:6px;}')
+        self.toolBar.setStyleSheet('QToolBar{spacing:6px;}')    
         self.colormapLabel = QtGui.QLabel(self.toolBar)
         self.colormapLabel.setText('Colormap')
         self.colormapLabel.setFont(font)
@@ -69,8 +91,6 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.vminLabel.setFont(font)
         self.toolBar.addWidget(self.vminLabel)
         self.vminDoubleSpinBox = QtGui.QDoubleSpinBox(self.toolBar)
-        self.vminDoubleSpinBox.setValue(0)
-        self.vminDoubleSpinBox.setSingleStep(0.1)
         self.toolBar.addWidget(self.vminDoubleSpinBox)
         self.vmaxLabel = QtGui.QLabel(self.toolBar)
         self.vmaxLabel.setText('Vmax')
@@ -78,7 +98,6 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.toolBar.addWidget(self.vmaxLabel)
         self.vmaxDoubleSpinBox = QtGui.QDoubleSpinBox(self.toolBar)
         self.vmaxDoubleSpinBox.setValue(2.0)
-        self.vmaxDoubleSpinBox.setSingleStep(0.1)
         self.toolBar.addWidget(self.vmaxDoubleSpinBox)
         self.toolBar.addSeparator()
 
@@ -134,32 +153,27 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
     def openSis(self, index):
         path = self.model.filePath(index)
         if os.path.isfile(path) and path.endswith('.sis'):
-            self.replot(path)
-            if self.currentSis is None:
-                self.setCmap()
             self.currentSis = path
+            self.replot(path)
             
     def replot(self, path):
         if path is not None:
             sis = RawSis(path)
             name = os.path.split(path)[1]
-            for plotw, image in zip(self.plotWidgetList, (sis.im0, sis.im1)):
-                plotw.replot(image, name)
+            self.plotWidget0.replot_here(sis.im0, name)
+            self.plotWidget1.replot_here(sis.im1, name)
             self.setLevels()
         else:
             print('path is None')
             
     def setLevels(self,):
-        levels = (self.vminDoubleSpinBox.value(),
-                self.vmaxDoubleSpinBox.value(),)
-        for plotw in self.plotWidgetList:
-            plotw.setLevels(levels)
-    
+        self.plotWidget0.setLevels((self.vminDoubleSpinBox.value(),
+                                    self.vmaxDoubleSpinBox.value(),))
+        self.plotWidget1.setLevels((self.vminDoubleSpinBox.value(),
+                                    self.vmaxDoubleSpinBox.value(),))
     def setCmap(self,):
-        cmap_name = self.colormapComboBox.currentText()
-        for plotw in self.plotWidgetList:
-            plotw.setCmap(cmap_name)
-            
+        self.plotWidget0.setCmap(self.colormapComboBox.currentText())
+        self.plotWidget1.setCmap(self.colormapComboBox.currentText())
             
     def infoBox(self,):
         QtGui.QMessageBox.about(self, PROG_NAME, PROG_COMMENT+'\n v. '+PROG_VERSION)

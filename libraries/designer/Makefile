@@ -13,8 +13,8 @@ UI_FILES = mainwindow.ui
 RESOURCES = resources.qrc 
  
 #pyuic4 and pyrcc4 binaries
-PYUIC = pyuic4
-PYRCC = pyrcc4
+PYUIC = pyside-uic #pyuic4
+PYRCC = pyside-rcc #pyrcc4
  
 #################################
 # DO NOT EDIT FOLLOWING

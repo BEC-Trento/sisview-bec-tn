@@ -2,43 +2,29 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Fri Jun 10 14:51:19 2016
-#      by: PyQt4 UI code generator 4.11.2
+# Created: Sat Oct 22 21:58:14 2016
+#      by: pyside-uic 0.2.15 running on PySide 1.2.4
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
-
-try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+from PySide import QtCore, QtGui
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
-        MainWindow.setObjectName(_fromUtf8("MainWindow"))
+        MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 600)
         font = QtGui.QFont()
         font.setPointSize(10)
         MainWindow.setFont(font)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/lens.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(":/icons/lens.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
         self.centralwidget = QtGui.QWidget(MainWindow)
-        self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
+        self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.verticalLayout.setObjectName("verticalLayout")
         self.fileTreeLabel = QtGui.QLabel(self.centralwidget)
-        self.fileTreeLabel.setObjectName(_fromUtf8("fileTreeLabel"))
+        self.fileTreeLabel.setObjectName("fileTreeLabel")
         self.verticalLayout.addWidget(self.fileTreeLabel)
         self.treeView = QtGui.QTreeView(self.centralwidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
@@ -46,34 +32,34 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.treeView.sizePolicy().hasHeightForWidth())
         self.treeView.setSizePolicy(sizePolicy)
-        self.treeView.setObjectName(_fromUtf8("treeView"))
+        self.treeView.setObjectName("treeView")
         self.treeView.header().setCascadingSectionResizes(True)
         self.treeView.header().setStretchLastSection(True)
         self.verticalLayout.addWidget(self.treeView)
         self.csvLabel = QtGui.QLabel(self.centralwidget)
-        self.csvLabel.setObjectName(_fromUtf8("csvLabel"))
+        self.csvLabel.setObjectName("csvLabel")
         self.verticalLayout.addWidget(self.csvLabel)
         self.tableWidget = CsvQTableWidget(self.centralwidget)
-        self.tableWidget.setObjectName(_fromUtf8("tableWidget"))
+        self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)
         self.verticalLayout.addWidget(self.tableWidget)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 25))
-        self.menubar.setObjectName(_fromUtf8("menubar"))
+        self.menubar.setObjectName("menubar")
         self.menuFile = QtGui.QMenu(self.menubar)
-        self.menuFile.setObjectName(_fromUtf8("menuFile"))
+        self.menuFile.setObjectName("menuFile")
         self.menuView = QtGui.QMenu(self.menubar)
-        self.menuView.setObjectName(_fromUtf8("menuView"))
+        self.menuView.setObjectName("menuView")
         self.menuHelp = QtGui.QMenu(self.menubar)
-        self.menuHelp.setObjectName(_fromUtf8("menuHelp"))
+        self.menuHelp.setObjectName("menuHelp")
         MainWindow.setMenuBar(self.menubar)
         self.toolBar = QtGui.QToolBar(MainWindow)
-        self.toolBar.setObjectName(_fromUtf8("toolBar"))
+        self.toolBar.setObjectName("toolBar")
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
         self.statusbar = QtGui.QStatusBar(MainWindow)
-        self.statusbar.setObjectName(_fromUtf8("statusbar"))
+        self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
         self.dockWidget0 = QtGui.QDockWidget(MainWindow)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Preferred)
@@ -81,9 +67,9 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.dockWidget0.sizePolicy().hasHeightForWidth())
         self.dockWidget0.setSizePolicy(sizePolicy)
-        self.dockWidget0.setObjectName(_fromUtf8("dockWidget0"))
+        self.dockWidget0.setObjectName("dockWidget0")
         self.plotWidget0 = PlotQWidget()
-        self.plotWidget0.setObjectName(_fromUtf8("plotWidget0"))
+        self.plotWidget0.setObjectName("plotWidget0")
         self.dockWidget0.setWidget(self.plotWidget0)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.dockWidget0)
         self.dockWidget1 = QtGui.QDockWidget(MainWindow)
@@ -92,17 +78,17 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.dockWidget1.sizePolicy().hasHeightForWidth())
         self.dockWidget1.setSizePolicy(sizePolicy)
-        self.dockWidget1.setObjectName(_fromUtf8("dockWidget1"))
+        self.dockWidget1.setObjectName("dockWidget1")
         self.plotWidget1 = PlotQWidget()
-        self.plotWidget1.setObjectName(_fromUtf8("plotWidget1"))
+        self.plotWidget1.setObjectName("plotWidget1")
         self.dockWidget1.setWidget(self.plotWidget1)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.dockWidget1)
         self.actionOpen_Folder = QtGui.QAction(MainWindow)
-        self.actionOpen_Folder.setObjectName(_fromUtf8("actionOpen_Folder"))
+        self.actionOpen_Folder.setObjectName("actionOpen_Folder")
         self.actionInfo = QtGui.QAction(MainWindow)
-        self.actionInfo.setObjectName(_fromUtf8("actionInfo"))
+        self.actionInfo.setObjectName("actionInfo")
         self.actionQuit = QtGui.QAction(MainWindow)
-        self.actionQuit.setObjectName(_fromUtf8("actionQuit"))
+        self.actionQuit.setObjectName("actionQuit")
         self.menuFile.addAction(self.actionOpen_Folder)
         self.menuFile.addAction(self.actionQuit)
         self.menuHelp.addAction(self.actionInfo)
@@ -114,21 +100,21 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(_translate("MainWindow", "SISView", None))
-        self.fileTreeLabel.setText(_translate("MainWindow", "File Tree View", None))
-        self.csvLabel.setText(_translate("MainWindow", "Display CSV", None))
-        self.menuFile.setTitle(_translate("MainWindow", "File", None))
-        self.menuView.setTitle(_translate("MainWindow", "View", None))
-        self.menuHelp.setTitle(_translate("MainWindow", "Help", None))
-        self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar", None))
-        self.dockWidget0.setWindowTitle(_translate("MainWindow", "Im0", None))
-        self.dockWidget1.setWindowTitle(_translate("MainWindow", "Im1", None))
-        self.actionOpen_Folder.setText(_translate("MainWindow", "Open Folder", None))
-        self.actionOpen_Folder.setShortcut(_translate("MainWindow", "Ctrl+O", None))
-        self.actionInfo.setText(_translate("MainWindow", "Info", None))
-        self.actionInfo.setShortcut(_translate("MainWindow", "F11", None))
-        self.actionQuit.setText(_translate("MainWindow", "Quit", None))
-        self.actionQuit.setShortcut(_translate("MainWindow", "Ctrl+Q", None))
+        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "SISView", None, QtGui.QApplication.UnicodeUTF8))
+        self.fileTreeLabel.setText(QtGui.QApplication.translate("MainWindow", "File Tree View", None, QtGui.QApplication.UnicodeUTF8))
+        self.csvLabel.setText(QtGui.QApplication.translate("MainWindow", "Display CSV", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuView.setTitle(QtGui.QApplication.translate("MainWindow", "View", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuHelp.setTitle(QtGui.QApplication.translate("MainWindow", "Help", None, QtGui.QApplication.UnicodeUTF8))
+        self.toolBar.setWindowTitle(QtGui.QApplication.translate("MainWindow", "toolBar", None, QtGui.QApplication.UnicodeUTF8))
+        self.dockWidget0.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Im0", None, QtGui.QApplication.UnicodeUTF8))
+        self.dockWidget1.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Im1", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionOpen_Folder.setText(QtGui.QApplication.translate("MainWindow", "Open Folder", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionOpen_Folder.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+O", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionInfo.setText(QtGui.QApplication.translate("MainWindow", "Info", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionInfo.setShortcut(QtGui.QApplication.translate("MainWindow", "F11", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionQuit.setText(QtGui.QApplication.translate("MainWindow", "Quit", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionQuit.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
 
 from libraries.csvqtablewidget import CsvQTableWidget
 from libraries.plotqwidget import PlotQWidget

@@ -4,8 +4,8 @@ Created on Sun May 24 01:46:57 2015
 
 @author: carmelo
 """
-import PyQt4
-from PyQt4 import QtCore, QtGui
+import PySide
+from PySide import QtCore, QtGui
 
 import numpy as np
 from matplotlib.cm import get_cmap
@@ -56,18 +56,23 @@ class PlotQWidget(QtGui.QWidget):
     def setParams(self,):
         pass
         
-    def replot(self, image, name=None,):
+    def replot_here(self, image, name=None,):
         if name is not None:
             self.nameLabel.setText(name)
         if self.isVisible():
             self.imView.setImage(image.T)
+#        cmap_name = dic['cmap']
+#        levels = (dic['vmin'], dic['vmax'])
+#        self.setLevels(levels)
+#        self.setCmap(cmap_name)
             
     def setLevels(self, levels):
         if self.isVisible():
             self.imView.setLevels(*levels)
     
     def setCmap(self, cmap_name):
-        if self.isVisible():
+#        if self.isVisible():
+            print('setting cmap')
             cmap = get_cmap(cmap_name)
             cmap_array = np.array([cmap(j) for j in range(cmap.N)])
             cmap_pg = pg.ColorMap(np.arange(cmap.N)/cmap.N, cmap_array)
@@ -83,25 +88,24 @@ if __name__ == '__main__':
     
     app = QtGui.QApplication(sys.argv)
     
-    file = '/home/carmelo/view/data/2015-03-04/images/20150304-data-0008.sis'
-    cmap_name = 'gist_stern'
+    file = '../data/2015-03-04/images/20150304-data-0010.sis'
     image = RawSis(file).im0
-    levels = (0, 2)
-
+    cmap_name = 'gist_stern'
+    levels = (0,2)
+    
     win = QtGui.QMainWindow()
     plotw = PlotQWidget()
     plotw.setupUi(win)
     plotw.setVisible(True)
     
     print(plotw.histogram.width())
-    plotw.replot(image, os.path.split(file)[1])
-    plotw.setLevels(levels)
+    plotw.replot_here(image, os.path.split(file)[1])
     plotw.setCmap(cmap_name)
-
+    plotw.setLevels(levels)
     
     win.setCentralWidget(plotw)
     win.setWindowTitle('pyqtgraph example: ImageViewColor')
-    win.show()  #raisethe IndexError
+    win.showMaximized()  #raisethe IndexError
     
     status = app.exec_()
 
