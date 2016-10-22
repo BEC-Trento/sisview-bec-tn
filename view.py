@@ -4,7 +4,6 @@ Model/view documentation can be found at
 http://doc.qt.nokia.com/latest/model-view-programming.html.
 """
 import sys, os
-import PyQt4
 from PyQt4 import QtGui, QtCore
 from libraries.mainwindow_ui import Ui_MainWindow
 
@@ -24,7 +23,7 @@ PROG_VERSION = '0.9'
 #from PyQt4.QtCore import QDir, Qt
 
 #ROOT = None
-ROOT = '/home/carmelo/eos2/data/'
+ROOT = sys.argv[1] if len(sys.argv) > 1 else None
 
 class RawSis():
     

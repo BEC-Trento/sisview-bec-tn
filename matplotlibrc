@@ -1,0 +1,8 @@
+# The default backend; one of GTK GTKAgg GTKCairo GTK3Agg GTK3Cairo
+# You can also deploy your own backend outside of matplotlib by
+# 'module://my_backend'.
+#backend      : qt5agg
+backend      : qt4agg
+# If you are using the Qt4Agg backend, you can choose here
+backend.qt4  : PyQt4        # PyQt4 | PySide
+
