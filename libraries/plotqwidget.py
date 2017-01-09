@@ -43,12 +43,13 @@ class PlotQWidget(QtGui.QWidget):
         
 #        self.figure, self.ax = plt.subplots(1,1, figsize=(18,6))
         self.figure = plt.figure(figsize=(18,6))
-        self.gridspec = gs.GridSpec(2, 2, width_ratios=[1,4], height_ratios=[4,1])
-        self.ax = self.figure.add_subplot(self.gridspec[1])
+#        self.gridspec = gs.GridSpec(2, 2, width_ratios=[1,4], height_ratios=[4,1])
+#        self.ax = self.figure.add_subplot(self.gridspec[1])
+        self.ax = self.figure.add_subplot(111)
         self.ax.axis('off')
         self.im = self.ax.imshow(np.random.rand(10,10), cmap='gray')
-        self.ax_y = self.figure.add_subplot(self.gridspec[0], sharey=self.ax)
-        self.ax_x = self.figure.add_subplot(self.gridspec[3], sharex=self.ax)        
+#        self.ax_y = self.figure.add_subplot(self.gridspec[0], sharey=self.ax)
+#        self.ax_x = self.figure.add_subplot(self.gridspec[3], sharex=self.ax)        
         self.figure.set_facecolor('none')        
         self.canvas = FigureCanvas(self.figure)
         
@@ -67,13 +68,14 @@ class PlotQWidget(QtGui.QWidget):
             self.nameLabel.setText(name)
         self.roi = None
         self.image = image
-        if self.isVisible():
+        if 1:#self.isVisible():
             if self.lims is None:
                 print('lims is None')
                 self._plotdata(dic)
                 self.lims = (self.ax.get_xlim(), self.ax.get_ylim())
 #                print(self.lims)
             else:
+                print(self.lims)
                 self.lims = (self.ax.get_xlim(), self.ax.get_ylim())
 #                print('newlims: ', self.lims)
 #                print(self.ax.get_xlim())
@@ -82,7 +84,8 @@ class PlotQWidget(QtGui.QWidget):
                 self._plotdata(dic)
                 self.ax.set_xlim(*self.lims[0])
                 self.ax.set_ylim(*self.lims[1])
-            
+        self.canvas.draw()
+
     def _plotdata(self, dic={}):
         image = self.image
 #        self.im.set_data(image)        
@@ -92,7 +95,8 @@ class PlotQWidget(QtGui.QWidget):
         self.ax.cla()
         self.ax.axis('off')
         self.ax.imshow(image, **dic)
-        self._plot_integrations((slice(None, None), slice(None, None)))
+
+#        self._plot_integrations((slice(None, None), slice(None, None)))
     
     def _plot_integrations(self, slices):
         slice_rows, slice_cols = slices

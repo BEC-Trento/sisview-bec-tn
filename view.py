@@ -112,7 +112,8 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.header.hideSection(1)
         self.header.setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
         if ROOT is None:
-            self.treeView.setRootIndex(self.model.index(QtCore.QDir.homePath()))
+            #self.treeView.setRootIndex(self.model.index(QtCore.QDir.homePath()))
+            self.treeView.setRootIndex(self.model.index(os.getcwd()))
         else:
             self.treeView.setRootIndex(self.model.index(ROOT))
         pass
