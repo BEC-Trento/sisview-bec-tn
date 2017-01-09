@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>Back-icon.png</file>
     <file>lens.png</file>
   </qresource>
 </RCC>

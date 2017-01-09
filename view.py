@@ -23,7 +23,7 @@ PROG_VERSION = '0.9'
 #from PyQt4.QtCore import QDir, Qt
 
 #ROOT = None
-ROOT = sys.argv[1] if len(sys.argv) > 1 else None
+ROOT = sys.argv[1] if len(sys.argv) > 1 else os.getcwd() #QtCore.QDir.homePath()
 
 class RawSis():
     
@@ -61,6 +61,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         super(Main, self).__init__()
         self.cwd = os.getcwd()
         self.currentSis = None
+        self.currentFolder = None
         
         self.setupUi(self)
         self.tableWidget.setupUi(self)
@@ -78,6 +79,13 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         font.setPointSize(10)
         self.toolBar.setFont(font)
         self.toolBar.setStyleSheet('QToolBar{spacing:6px;}')
+        self.toolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+        self.actionBack = QtGui.QAction(self.toolBar)
+        self.actionBack.setIcon(QtGui.QIcon(":/icons/Back-icon.png"))
+        self.actionBack.setObjectName("actionBack")
+        self.actionBack.setIconText("Back")      
+        self.toolBar.addAction(self.actionBack)
+        self.toolBar.addSeparator()
         self.colormapLabel = QtGui.QLabel(self.toolBar)
         self.colormapLabel.setText('Colormap')
         self.colormapLabel.setFont(font)
@@ -111,11 +119,9 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.header = self.treeView.header()
         self.header.hideSection(1)
         self.header.setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
-        if ROOT is None:
-            #self.treeView.setRootIndex(self.model.index(QtCore.QDir.homePath()))
-            self.treeView.setRootIndex(self.model.index(os.getcwd()))
-        else:
-            self.treeView.setRootIndex(self.model.index(ROOT))
+        
+        self.currentFolder = ROOT        
+        self.treeView.setRootIndex(self.model.index(ROOT))
         pass
         
     
@@ -133,17 +139,27 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.menuView.addAction(self.actionToggle1)
         self.actionInfo.triggered.connect(self.infoBox)
         self.actionQuit.triggered.connect(QtGui.qApp.quit)
+        self.actionBack.triggered.connect(self.goBackFolder)
         pass
     
     def openFolder(self,):
         folder = QtGui.QFileDialog.getExistingDirectory(self, caption='Open folder',
                                                         directory=QtCore.QDir.homePath())
+        self.currentFolder = folder
         self.treeView.setRootIndex(self.model.index(folder))
     
     def goToFolder(self, index):
         path = self.model.filePath(index)
         if os.path.isdir(path):
+            self.currentFolder = path
             self.treeView.setRootIndex(self.model.index(path))
+            
+    def goBackFolder(self):
+        parent = os.path.abspath(os.path.join(self.currentFolder, os.pardir))
+        print(parent)
+        self.currentFolder = parent
+        self.treeView.setRootIndex(self.model.index(parent))
+        pass
             
     def openCsv(self, index):
         path = self.model.filePath(index)
