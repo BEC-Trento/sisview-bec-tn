@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 """An example of how to use models and views in PyQt4.
 Model/view documentation can be found at
 http://doc.qt.nokia.com/latest/model-view-programming.html.
