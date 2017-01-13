@@ -79,6 +79,15 @@
     <property name="title">
      <string>View</string>
     </property>
+    <widget class="QMenu" name="menuPlot_positioning">
+     <property name="title">
+      <string>Plot positioning</string>
+     </property>
+     <addaction name="actionRight"/>
+     <addaction name="actionTop"/>
+    </widget>
+    <addaction name="menuPlot_positioning"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -154,6 +163,16 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionRight">
+   <property name="text">
+    <string>Right</string>
+   </property>
+  </action>
+  <action name="actionTop">
+   <property name="text">
+    <string>Top</string>
    </property>
   </action>
  </widget>

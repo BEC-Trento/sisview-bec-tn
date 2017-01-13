@@ -78,7 +78,8 @@ class CsvQTableWidget(QtGui.QTableWidget):
         horizHeader.setResizeMode(QtGui.QHeaderView.ResizeToContents)
         vertHeader = self.verticalHeader()
         vertHeader.setStretchLastSection(True)
-        self.cellDoubleClicked.connect(self.sisPlot)
+#        self.cellDoubleClicked.connect(self.sisPlot)
+        self.cellActivated.connect(self.sisPlot) #cellActivated triggers when double-clicked OR press Enter!! =D
         
     def horizHeaderMenu(self, pos):
         columnIndex = self.horizontalHeader().logicalIndexAt(pos)
@@ -99,6 +100,7 @@ class CsvQTableWidget(QtGui.QTableWidget):
         print(name)
         if name.endswith('.sis'):
             path = os.path.join(self.imagesPath, name)
+            self.mainWindow.currentSis = path
             self.mainWindow.replot(path)
         
     def setColumnsVis(self):
@@ -126,7 +128,7 @@ class CsvQTableWidget(QtGui.QTableWidget):
             for i, row in enumerate(table):
                 for j, col in enumerate(row):
                     item = QtGui.QTableWidgetItem(col)
-                    item.setFlags(QtCore.Qt.ItemIsEnabled)
+                    item.setFlags(QtCore.Qt.ItemIsEnabled)  # this makes the cell non-editable, but also non-pressable
                     self.setItem(i, j, item)
         self.setVisibleList = [False for j in range(len(self.headers))]
         for j in self.standardVisibleColumnIndices:

@@ -8,6 +8,7 @@ from PyQt4 import QtGui, QtCore
 from libraries.mainwindow_ui import Ui_MainWindow
 
 import numpy as np
+from pyfftw.interfaces.scipy_fftpack import fft2, fftshift
 import matplotlib
 from matplotlib.pyplot import colormaps
 matplotlib.use('Qt4Agg')
@@ -15,7 +16,7 @@ matplotlib.use('Qt4Agg')
 
 PROG_NAME = 'SISView'
 PROG_COMMENT = 'A tool for a quick visualization of .sis files'
-PROG_VERSION = '0.9'
+PROG_VERSION = '0.9.2'
 
 
 #from PyQt4.QtGui import (QApplication, QColumnView, QFileSystemModel,
@@ -60,8 +61,6 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
     def __init__(self, ):
         super(Main, self).__init__()
         self.cwd = os.getcwd()
-        self.currentSis = None
-        self.currentFolder = None
         
         self.setupUi(self)
         self.tableWidget.setupUi(self)
@@ -73,6 +72,10 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.rewriteTreeView()
 #        self.rewritePlotWidget()
         self.connectActions()
+        
+        self.currentSis = None
+        self.fft_flag = None
+        self.currentFolder = None
         
     def setupToolbar(self,):
         font = QtGui.QFont()
@@ -110,6 +113,16 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.vmaxDoubleSpinBox.setValue(2.0)
         self.toolBar.addWidget(self.vmaxDoubleSpinBox)
         self.toolBar.addSeparator()
+        self.fftLabel = QtGui.QLabel(self.toolBar)
+        self.fftLabel.setText('FFT plot')
+        self.fftLabel.setFont(font)
+        self.toolBar.addWidget(self.fftLabel)
+        self.fftComboBox = QtGui.QComboBox(self.toolBar)
+        self.fftComboBox.setFont(font)
+        self.fftComboBox.addItems(['None', 'Im0', 'Im1'])
+        self.fftComboBox.setCurrentIndex(0)
+        self.toolBar.addWidget(self.fftComboBox)
+        self.toolBar.addSeparator()
 
         
     def rewriteTreeView(self,):
@@ -131,8 +144,11 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.treeView.activated.connect(self.openCsv)
         self.treeView.doubleClicked.connect(self.goToFolder)
         self.colormapComboBox.currentIndexChanged.connect(lambda: self.replot(self.currentSis))
+        self.fftComboBox.currentIndexChanged.connect(self.set_fft_flag)        
         self.vminDoubleSpinBox.valueChanged.connect(lambda: self.replot(self.currentSis))
         self.vmaxDoubleSpinBox.valueChanged.connect(lambda: self.replot(self.currentSis))
+        self.actionTop.triggered.connect(self.set_dock_top)
+        self.actionRight.triggered.connect(self.set_dock_right)
         self.actionToggle0 = self.dockWidget0.toggleViewAction()
         self.actionToggle1 = self.dockWidget1.toggleViewAction()
         self.menuView.addAction(self.actionToggle0)
@@ -141,6 +157,17 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.actionQuit.triggered.connect(QtGui.qApp.quit)
         self.actionBack.triggered.connect(self.goBackFolder)
         pass
+    
+    def set_dock_right(self,):
+        # positions seem to be: left = 1, right = 2, top = ?
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockWidget0)
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockWidget1)
+        pass
+    
+    
+    def set_dock_top(self,):
+        self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.dockWidget0)
+        self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.dockWidget1)
     
     def openFolder(self,):
         folder = QtGui.QFileDialog.getExistingDirectory(self, caption='Open folder',
@@ -173,19 +200,37 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         path = self.model.filePath(index)
         if os.path.isfile(path) and path.endswith('.sis'):
             self.currentSis = path
+            print('Directly opened ', self.currentSis)
             self.replot(path)
             
+    def set_fft_flag(self,):
+        self.fft_flag = self.fftComboBox.currentText()
+        self.replot(self.currentSis)
+        
     def replot(self, path):
+    #TODO: ASSOLUTAMENTE da implementare in modo che NON debba ricalcolare
+    # la FFT ogni volta che plotta, come invece sta facendo ora!
         if path is not None:
-            dic = {'cmap': self.colormapComboBox.currentText(),
-                   'vmin': self.vminDoubleSpinBox.value(),
-                   'vmax': self.vmaxDoubleSpinBox.value(),}
-            print(self.colormapComboBox.currentText())
+            dic_img = {'cmap': self.colormapComboBox.currentText(),
+                       'vmin': self.vminDoubleSpinBox.value(),
+                       'vmax': self.vmaxDoubleSpinBox.value(),}
+            dic_fft = {'cmap': 'jet',
+                       'vmin': 0,
+                       'vmax': 3,}
+#            print(self.colormapComboBox.currentText())
             sis = RawSis(path)
             name = os.path.split(path)[1]
-            for plotw, image in [(self.plotWidget0, sis.im0),
-                                (self.plotWidget1, sis.im1)]:
-                plotw.replot(image, dic, name)
+            if self.fft_flag == 'Im0':
+                images = [sis.im0, fftshift(np.log10(np.abs(fft2(sis.im0))))]
+                dicts = [dic_img, dic_fft]
+            elif self.fft_flag == 'Im1':
+                images = [fftshift(np.log10(np.abs(fft2(sis.im1)))), sis.im1]
+                dicts = [dic_fft, dic_img]
+            else:
+                images = [sis.im0, sis.im1]
+                dicts = [dic_img, dic_img]
+            for j, plotw in enumerate([self.plotWidget0, self.plotWidget1]):
+                plotw.replot(images[j], dicts[j], name)
         else:
             print('path is None')
             

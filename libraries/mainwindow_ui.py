@@ -2,8 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Fri Jun 10 14:51:19 2016
-#      by: PyQt4 UI code generator 4.11.2
+# Created by: PyQt4 UI code generator 4.11.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -66,6 +65,8 @@ class Ui_MainWindow(object):
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
         self.menuView = QtGui.QMenu(self.menubar)
         self.menuView.setObjectName(_fromUtf8("menuView"))
+        self.menuPlot_positioning = QtGui.QMenu(self.menuView)
+        self.menuPlot_positioning.setObjectName(_fromUtf8("menuPlot_positioning"))
         self.menuHelp = QtGui.QMenu(self.menubar)
         self.menuHelp.setObjectName(_fromUtf8("menuHelp"))
         MainWindow.setMenuBar(self.menubar)
@@ -103,8 +104,16 @@ class Ui_MainWindow(object):
         self.actionInfo.setObjectName(_fromUtf8("actionInfo"))
         self.actionQuit = QtGui.QAction(MainWindow)
         self.actionQuit.setObjectName(_fromUtf8("actionQuit"))
+        self.actionRight = QtGui.QAction(MainWindow)
+        self.actionRight.setObjectName(_fromUtf8("actionRight"))
+        self.actionTop = QtGui.QAction(MainWindow)
+        self.actionTop.setObjectName(_fromUtf8("actionTop"))
         self.menuFile.addAction(self.actionOpen_Folder)
         self.menuFile.addAction(self.actionQuit)
+        self.menuPlot_positioning.addAction(self.actionRight)
+        self.menuPlot_positioning.addAction(self.actionTop)
+        self.menuView.addAction(self.menuPlot_positioning.menuAction())
+        self.menuView.addSeparator()
         self.menuHelp.addAction(self.actionInfo)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuView.menuAction())
@@ -119,6 +128,7 @@ class Ui_MainWindow(object):
         self.csvLabel.setText(_translate("MainWindow", "Display CSV", None))
         self.menuFile.setTitle(_translate("MainWindow", "File", None))
         self.menuView.setTitle(_translate("MainWindow", "View", None))
+        self.menuPlot_positioning.setTitle(_translate("MainWindow", "Plot positioning", None))
         self.menuHelp.setTitle(_translate("MainWindow", "Help", None))
         self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar", None))
         self.dockWidget0.setWindowTitle(_translate("MainWindow", "Im0", None))
@@ -129,6 +139,8 @@ class Ui_MainWindow(object):
         self.actionInfo.setShortcut(_translate("MainWindow", "F11", None))
         self.actionQuit.setText(_translate("MainWindow", "Quit", None))
         self.actionQuit.setShortcut(_translate("MainWindow", "Ctrl+Q", None))
+        self.actionRight.setText(_translate("MainWindow", "Right", None))
+        self.actionTop.setText(_translate("MainWindow", "Top", None))
 
 from libraries.csvqtablewidget import CsvQTableWidget
 from libraries.plotqwidget import PlotQWidget
