@@ -1,18 +1,39 @@
-#!/usr/bin/python
-"""An example of how to use models and views in PyQt4.
-Model/view documentation can be found at
-http://doc.qt.nokia.com/latest/model-view-programming.html.
-"""
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) 2016  Carmelo Mordini
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 import sys, os
 from PyQt4 import QtGui, QtCore
-from libraries.mainwindow_ui import Ui_MainWindow
 
 import numpy as np
-from pyfftw.interfaces.scipy_fftpack import fft2, fftshift
+try:
+    import pyfftw.interfaces.scipy_fftpack as fftpack
+except ImportError:
+    try:
+        import scipy.fftpack as fftpack
+    except ImportError:
+        fftpack = np.fft
+fft2, fftshift = fftpack.fft2, fftpack.fftshift
 import matplotlib
 from matplotlib.pyplot import colormaps
 matplotlib.use('Qt4Agg')
 
+from libraries.libsis import RawSis
+from libraries.mainwindow_ui import Ui_MainWindow
 
 PROG_NAME = 'SISView'
 PROG_COMMENT = 'A tool for a quick visualization of .sis files'
@@ -23,39 +44,6 @@ PROG_VERSION = '0.9.2'
 #                         QSplitter, QTreeView)
 #from PyQt4.QtCore import QDir, Qt
 
-#ROOT = None
-ROOT = sys.argv[1] if len(sys.argv) > 1 else os.getcwd() #QtCore.QDir.homePath()
-
-class RawSis():
-    
-    def __init__(self, filename, scale=None):
-        
-        im0, im1, im, raw = self.readsis(filename)
-        if scale is not None:
-            self.scale = scale
-        else:
-            self.scale = 2**16/10.0#1.0
-        
-        self.im0 = im0/self.scale
-        self.im1 = im1/self.scale
-        self.im_full  = im/self.scale
-        self.raw = raw/self.scale
-        
-    
-    def readsis(self,filename):
-        f = open(filename, 'rb')  #apre in binario
-        rawdata = np.fromfile(f,'H').astype(int)
-        f.close()
-        
-        width=rawdata[6]  # N cols
-        height=rawdata[5] # N rows
-        #rispetto ad octave, gli indici cambiano (python is 0-based)
-        image = rawdata[-width*height : ]
-        image.resize(height,width)
-        im0 = image[:height//2, :]
-        im1 = image[height//2:, :]
-        
-        return im0, im1, image, rawdata #, image.shape
 
 class Main(QtGui.QMainWindow, Ui_MainWindow):
     def __init__(self, ):
@@ -76,6 +64,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.currentSis = None
         self.fft_flag = None
         self.currentFolder = None
+        self.dockAreasDict = {'Top': QtCore.Qt.TopDockWidgetArea, 'Right': QtCore.Qt.RightDockWidgetArea}
         
     def setupToolbar(self,):
         font = QtGui.QFont()
@@ -132,7 +121,7 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.header = self.treeView.header()
         self.header.hideSection(1)
         self.header.setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
-        
+        ROOT = sys.argv[1] if len(sys.argv) > 1 else os.getcwd() #QtCore.QDir.homePath()
         self.currentFolder = ROOT        
         self.treeView.setRootIndex(self.model.index(ROOT))
         pass
@@ -147,8 +136,9 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.fftComboBox.currentIndexChanged.connect(self.set_fft_flag)        
         self.vminDoubleSpinBox.valueChanged.connect(lambda: self.replot(self.currentSis))
         self.vmaxDoubleSpinBox.valueChanged.connect(lambda: self.replot(self.currentSis))
-        self.actionTop.triggered.connect(self.set_dock_top)
-        self.actionRight.triggered.connect(self.set_dock_right)
+        self.actionTop.triggered.connect(lambda: self.dock_to_area(self.actionTop.text()))
+        self.actionRight.triggered.connect(lambda: self.dock_to_area(self.actionRight.text()))
+        self.actionDetatch_All.triggered.connect(self.dock_detatch_all)
         self.actionToggle0 = self.dockWidget0.toggleViewAction()
         self.actionToggle1 = self.dockWidget1.toggleViewAction()
         self.menuView.addAction(self.actionToggle0)
@@ -158,16 +148,17 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
         self.actionBack.triggered.connect(self.goBackFolder)
         pass
     
-    def set_dock_right(self,):
+    def dock_to_area(self, pos):
         # positions seem to be: left = 1, right = 2, top = ?
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockWidget0)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockWidget1)
-        pass
-    
-    
-    def set_dock_top(self,):
-        self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.dockWidget0)
-        self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.dockWidget1)
+        for dock in [self.dockWidget0, self.dockWidget1]:
+            dock.setFloating(False)
+            self.addDockWidget(self.dockAreasDict[pos], dock)
+        self.showMaximized()
+            
+    def dock_detatch_all(self):
+        for dock in [self.dockWidget0, self.dockWidget1]:
+            dock.setFloating(True)
+        self.showNormal()
     
     def openFolder(self,):
         folder = QtGui.QFileDialog.getExistingDirectory(self, caption='Open folder',

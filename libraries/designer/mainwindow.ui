@@ -85,6 +85,8 @@
      </property>
      <addaction name="actionRight"/>
      <addaction name="actionTop"/>
+     <addaction name="separator"/>
+     <addaction name="actionDetatch_All"/>
     </widget>
     <addaction name="menuPlot_positioning"/>
     <addaction name="separator"/>
@@ -173,6 +175,11 @@
   <action name="actionTop">
    <property name="text">
     <string>Top</string>
+   </property>
+  </action>
+  <action name="actionDetatch_All">
+   <property name="text">
+    <string>Detatch All</string>
    </property>
   </action>
  </widget>
