@@ -16,8 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+from __future__ import with_statement
 from PyQt4 import QtCore, QtGui
 import os, csv
+from io import open
+from itertools import izip
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -35,36 +38,36 @@ except AttributeError:
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
-        Dialog.setObjectName(_fromUtf8("Dialog"))
+        Dialog.setObjectName(_fromUtf8(u"Dialog"))
         Dialog.setWindowModality(QtCore.Qt.WindowModal)
         Dialog.resize(236, 300)
         Dialog.setAutoFillBackground(False)
         self.verticalLayout_3 = QtGui.QVBoxLayout(Dialog)
-        self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
+        self.verticalLayout_3.setObjectName(_fromUtf8(u"verticalLayout_3"))
         self.scrollArea = QtGui.QScrollArea(Dialog)
         self.scrollArea.setWidgetResizable(True)
-        self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
+        self.scrollArea.setObjectName(_fromUtf8(u"scrollArea"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 216, 243))
-        self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
+        self.scrollAreaWidgetContents.setObjectName(_fromUtf8(u"scrollAreaWidgetContents"))
         self.verticalLayout = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.verticalLayout.setObjectName(_fromUtf8(u"verticalLayout"))
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout_3.addWidget(self.scrollArea)
         self.buttonBox = QtGui.QDialogButtonBox(Dialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
         self.buttonBox.setCenterButtons(False)
-        self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
+        self.buttonBox.setObjectName(_fromUtf8(u"buttonBox"))
         self.verticalLayout_3.addWidget(self.buttonBox)
 
         self.retranslateUi(Dialog)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), Dialog.accept)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), Dialog.reject)
+        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8(u"accepted()")), Dialog.accept)
+        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8(u"rejected()")), Dialog.reject)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
-        Dialog.setWindowTitle(_translate("Dialog", "Select visible columns", None))
+        Dialog.setWindowTitle(_translate(u"Dialog", u"Select visible columns", None))
 
 
 class CsvQTableWidget(QtGui.QTableWidget):
@@ -74,8 +77,8 @@ class CsvQTableWidget(QtGui.QTableWidget):
         
     def setupUi(self, setMainWindow):
         self.mainWindow = setMainWindow
-        self.CSVName = ''
-        self.imagesPath = ''
+        self.CSVName = u''
+        self.imagesPath = u''
         self.setVisibleDialog = None
         self.setVisibleList = None
         self.headers = None
@@ -97,19 +100,19 @@ class CsvQTableWidget(QtGui.QTableWidget):
 #        print('column(%d)' % columnIndex)
         self.clickedColumn = columnIndex
         menu = QtGui.QMenu()
-        actionHideColumn = QtGui.QAction('Hide', self)
+        actionHideColumn = QtGui.QAction(u'Hide', self)
         actionHideColumn.triggered.connect(
                 lambda x: self.hideColumn(columnIndex))
         menu.addAction(actionHideColumn)
-        actionPop = QtGui.QAction('Set Visible Columns', self)
+        actionPop = QtGui.QAction(u'Set Visible Columns', self)
         actionPop.triggered.connect(self.popDialog)
         menu.addAction(actionPop)
         menu.exec_(QtGui.QCursor.pos())
     
     def sisPlot(self, row, col):
-        name = self.item(row, 1).text()
-        print(name)
-        if name.endswith('.sis'):
+        name = str(self.item(row, 1).text())
+        print name
+        if name.endswith(u'.sis'):
             path = os.path.join(self.imagesPath, name)
             self.mainWindow.currentSis = path
             self.mainWindow.replot(path)
@@ -125,9 +128,9 @@ class CsvQTableWidget(QtGui.QTableWidget):
     def displayCSV(self, fileName):           
 #        fileName = QtGui.QFileDialog.getOpenFileName(self,'Open file', filter='CSV file (*.csv)', directory='/home/carmelo/master-thesis/data')
         root, self.CSVName = os.path.split(fileName)
-        self.imagesPath = os.path.join(root, 'images')
+        self.imagesPath = os.path.join(root, u'images')
 #        self.tabWidget.setTabText(0, os.path.split(fileName)[1])
-        with open(fileName, "r") as fileInput:
+        with open(fileName, u"r") as fileInput:
             rows = [row for row in csv.reader(fileInput)]
             self.headers = rows[0]
             table = rows[1:]
@@ -141,7 +144,7 @@ class CsvQTableWidget(QtGui.QTableWidget):
                     item = QtGui.QTableWidgetItem(col)
                     item.setFlags(QtCore.Qt.ItemIsEnabled)  # this makes the cell non-editable, but also non-pressable
                     self.setItem(i, j, item)
-        self.setVisibleList = [False for j in range(len(self.headers))]
+        self.setVisibleList = [False for j in xrange(len(self.headers))]
         for j in self.standardVisibleColumnIndices:
             self.setVisibleList[j] = True
         self.setColumnsVis()
@@ -154,9 +157,9 @@ class SetVisibleColumnsDialog(QtGui.QDialog, Ui_Dialog):
         self.checkBoxList = []
         checkboxnames = parent.headers
         vislist = self.parent.setVisibleList
-        for name, val in zip(checkboxnames, vislist):
+        for name, val in izip(checkboxnames, vislist):
             checkBox = QtGui.QCheckBox(self)
-            checkBox.setObjectName('checkbox_'+name)
+            checkBox.setObjectName(u'checkbox_'+name)
             checkBox.setText(name)
             checkBox.setChecked(val)
             self.verticalLayout.addWidget(checkBox)

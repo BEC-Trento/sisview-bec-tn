@@ -1,4 +1,4 @@
-"""
+u"""
 Copyright (C) 2017 Carmelo Mordini
 
 This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 # -*- coding: utf-8 -*-
-"""
+from __future__ import division
+from io import open
+u"""
 Created on Sun May 24 01:46:57 2015
 
 @author: carmelo
@@ -46,8 +48,8 @@ class RawSis():
         
     
     def readsis(self,filename):
-        f = open(filename, 'rb')  #apre in binario
-        rawdata = np.fromfile(f,'H').astype(int)
+        f = open(filename, u'rb')  #apre in binario
+        rawdata = np.fromfile(f,u'H').astype(int)
         f.close()
         
         width=rawdata[6]  # N cols
@@ -90,9 +92,9 @@ class PlotQWidget(QtGui.QWidget):
     def replot(self, image, dic=None, name=None, **kwargs):
         if name is not None:
             self.nameLabel.setText(name)
-            levels = (dic['vmin'], dic['vmax'])
-            cmap = get_cmap(dic['cmap'])
-            cmap_array = np.array([cmap(j) for j in range(cmap.N)])
+            levels = (dic[u'vmin'], dic[u'vmax'])
+            cmap = get_cmap(dic[u'cmap'])
+            cmap_array = np.array([cmap(j) for j in xrange(cmap.N)])
             cmap_pg = pg.ColorMap(np.arange(cmap.N)/cmap.N, cmap_array)
             self.imv.setImage(image.T,)
             self.imv.setLevels(*levels)
@@ -101,16 +103,16 @@ class PlotQWidget(QtGui.QWidget):
                
          
                
-if __name__ == '__main__':
+if __name__ == u'__main__':
     import sys
     
     app = QtGui.QApplication(sys.argv)
     
-    file = '/home/carmelo/eos2/data/images/20160330-EoS - Bragg trials-0008.sis'
-    dic = {'vmin': 0, 'vmax': 2.0}
+    file = u'/home/carmelo/eos2/data/images/20160330-EoS - Bragg trials-0008.sis'
+    dic = {u'vmin': 0, u'vmax': 2.0}
 
-    cmap = get_cmap('gist_stern')
-    cmap_array = np.array([cmap(j) for j in range(cmap.N)])
+    cmap = get_cmap(u'gist_stern')
+    cmap_array = np.array([cmap(j) for j in xrange(cmap.N)])
     cmap_pg = pg.ColorMap(np.arange(cmap.N)/cmap.N, cmap_array)
 
     image = RawSis(file).im0.T
@@ -127,7 +129,7 @@ if __name__ == '__main__':
 #    imv.ui.histogram.gradient.setColorMap(cmap_pg)
     
     win.setCentralWidget(imv)
-    win.setWindowTitle('pyqtgraph example: ImageViewColor')
+    win.setWindowTitle(u'pyqtgraph example: ImageViewColor')
     win.show()  #raisethe IndexError
     
     status = app.exec_()

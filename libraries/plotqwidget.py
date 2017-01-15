@@ -1,4 +1,4 @@
-"""
+u"""
 Copyright (C) 2017 Carmelo Mordini
 
 This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 # -*- coding: utf-8 -*-
-"""
+u"""
 Created on Sun May 24 01:46:57 2015
 
 @author: carmelo
@@ -31,8 +31,6 @@ from matplotlib.backends.backend_qt4agg import (
     FigureCanvasQTAgg as FigureCanvas,
     NavigationToolbar2QT as NavigationToolbar)
 
-
-from libraries.roi import ROI
 
 
 class PlotQWidget(QtGui.QWidget):
@@ -62,11 +60,11 @@ class PlotQWidget(QtGui.QWidget):
 #        self.gridspec = gs.GridSpec(2, 2, width_ratios=[1,4], height_ratios=[4,1])
 #        self.ax = self.figure.add_subplot(self.gridspec[1])
         self.ax = self.figure.add_subplot(111)
-        self.ax.axis('off')
-        self.im = self.ax.imshow(np.random.rand(10,10), cmap='gray')
+        self.ax.axis(u'off')
+        self.im = self.ax.imshow(np.random.rand(10,10), cmap=u'gray')
 #        self.ax_y = self.figure.add_subplot(self.gridspec[0], sharey=self.ax)
 #        self.ax_x = self.figure.add_subplot(self.gridspec[3], sharex=self.ax)        
-        self.figure.set_facecolor('none')        
+        self.figure.set_facecolor(u'none')        
         self.canvas = FigureCanvas(self.figure)
         
         
@@ -86,12 +84,12 @@ class PlotQWidget(QtGui.QWidget):
         self.image = image
         if 1:#self.isVisible():
             if self.lims is None:
-                print('lims is None')
+                print u'lims is None'
                 self._plotdata(dic)
                 self.lims = (self.ax.get_xlim(), self.ax.get_ylim())
 #                print(self.lims)
             else:
-                print(self.lims)
+                print self.lims
                 self.lims = (self.ax.get_xlim(), self.ax.get_ylim())
 #                print('newlims: ', self.lims)
 #                print(self.ax.get_xlim())
@@ -109,29 +107,9 @@ class PlotQWidget(QtGui.QWidget):
 #        self.im.norm.vmax = dic['vmax']
 #        self.im.set_cmap(dic['cmap'])
         self.ax.cla()
-        self.ax.axis('off')
+        self.ax.axis(u'off')
         self.ax.imshow(image, **dic)
 
-#        self._plot_integrations((slice(None, None), slice(None, None)))
-    
-    def _plot_integrations(self, slices):
-        slice_rows, slice_cols = slices
-        image = self.image[slice_rows, slice_cols]
-        int_x = image.sum(0)
-        int_y = image.sum(1)
-        self.ax_x.cla()
-        self.ax_y.cla()
-        x_start = slice_cols.start if slice_cols.start is not None else 0
-        y_start = slice_rows.start if slice_rows.start is not None else 0
-        self.ax_x.plot(np.arange(len(int_x)) + x_start, int_x)
-        self.ax_y.plot(int_y, np.arange(len(int_y)) + y_start)
-        if self.lims is not None:
-            self.ax.set_xlim(*self.lims[0])
-            self.ax.set_ylim(*self.lims[1])
-        if self.roi is None:
-            self.roi = ROI(self.ax, picker_radius=60)
-            self.roi.signaler.update.connect(self._plot_integrations)
-            self.canvas.draw()
         
         
     

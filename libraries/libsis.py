@@ -15,6 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+from __future__ import division
+#from io import open
+
+import numpy as np
 class RawSis():
     
     def __init__(self, filename, scale=None):
@@ -32,10 +36,9 @@ class RawSis():
         
     
     def readsis(self,filename):
-        f = open(filename, 'rb')  #apre in binario
-        rawdata = np.fromfile(f,'H').astype(int)
-        f.close()
-        
+        with open(filename, 'rb') as f:  #apre in binario
+            rawdata = np.fromfile(f, 'H').astype(int)
+                
         width=rawdata[6]  # N cols
         height=rawdata[5] # N rows
         #rispetto ad octave, gli indici cambiano (python is 0-based)
