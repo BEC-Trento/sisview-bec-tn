@@ -24,15 +24,11 @@ from PyQt4 import QtCore, QtGui
 
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.gridspec as gs
 
 
 from matplotlib.backends.backend_qt4agg import (
     FigureCanvasQTAgg as FigureCanvas,
     NavigationToolbar2QT as NavigationToolbar)
-
-
-from libraries.roi import ROI
 
 
 class PlotQWidget(QtGui.QWidget):
@@ -112,27 +108,6 @@ class PlotQWidget(QtGui.QWidget):
         self.ax.axis('off')
         self.ax.imshow(image, **dic)
 
-#        self._plot_integrations((slice(None, None), slice(None, None)))
-    
-    def _plot_integrations(self, slices):
-        slice_rows, slice_cols = slices
-        image = self.image[slice_rows, slice_cols]
-        int_x = image.sum(0)
-        int_y = image.sum(1)
-        self.ax_x.cla()
-        self.ax_y.cla()
-        x_start = slice_cols.start if slice_cols.start is not None else 0
-        y_start = slice_rows.start if slice_rows.start is not None else 0
-        self.ax_x.plot(np.arange(len(int_x)) + x_start, int_x)
-        self.ax_y.plot(int_y, np.arange(len(int_y)) + y_start)
-        if self.lims is not None:
-            self.ax.set_xlim(*self.lims[0])
-            self.ax.set_ylim(*self.lims[1])
-        if self.roi is None:
-            self.roi = ROI(self.ax, picker_radius=60)
-            self.roi.signaler.update.connect(self._plot_integrations)
-            self.canvas.draw()
-        
         
     
 
