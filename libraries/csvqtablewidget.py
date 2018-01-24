@@ -80,8 +80,9 @@ class CsvQTableWidget(QtGui.QTableWidget):
         self.setVisibleList = None
         self.headers = None
         self.fids = None
-        self.standardVisibleColumnIndices = [1,126,127,128,129,130,131,132]
+#        self.standardVisibleColumnIndices = [1,126,127,128,129,130,131,132]
 #        self.standardVisibleColumnIndices = [1,2,12,60,70,119,120,126,127,128,129,130,131,132]
+        self.standardVisibleColumnIndices = [1,2,] + list(range(-8,-1))
         horizHeader = self.horizontalHeader()
         horizHeader.setStretchLastSection(True)
         horizHeader.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -127,20 +128,27 @@ class CsvQTableWidget(QtGui.QTableWidget):
         root, self.CSVName = os.path.split(fileName)
         self.imagesPath = os.path.join(root, 'images')
 #        self.tabWidget.setTabText(0, os.path.split(fileName)[1])
-        with open(fileName, "r") as fileInput:
+#        with open(fileName, "r") as fileInput:        
+        try:
+            fileInput = open(fileName, "r")
             rows = [row for row in csv.reader(fileInput)]
-            self.headers = rows[0]
-            table = rows[1:]
-            self.fids = [r[0] for r in table] #lista con i FileId
-            self.setRowCount(len(table))
-            self.setColumnCount(len(self.headers))
-            self.setHorizontalHeaderLabels(self.headers)
-            self.setVerticalHeaderLabels(self.fids)
-            for i, row in enumerate(table):
-                for j, col in enumerate(row):
-                    item = QtGui.QTableWidgetItem(col)
-                    item.setFlags(QtCore.Qt.ItemIsEnabled)  # this makes the cell non-editable, but also non-pressable
-                    self.setItem(i, j, item)
+        except UnicodeDecodeError:
+            fileInput = open(fileName, "r", encoding='latin1')
+            rows = [row for row in csv.reader(fileInput)]
+        finally:
+            fileInput.close()
+        self.headers = rows[0]
+        table = rows[1:]
+        self.fids = [r[0] for r in table] #lista con i FileId
+        self.setRowCount(len(table))
+        self.setColumnCount(len(self.headers))
+        self.setHorizontalHeaderLabels(self.headers)
+        self.setVerticalHeaderLabels(self.fids)
+        for i, row in enumerate(table):
+            for j, col in enumerate(row):
+                item = QtGui.QTableWidgetItem(col)
+                item.setFlags(QtCore.Qt.ItemIsEnabled)  # this makes the cell non-editable, but also non-pressable
+                self.setItem(i, j, item)
         self.setVisibleList = [False for j in range(len(self.headers))]
         for j in self.standardVisibleColumnIndices:
             self.setVisibleList[j] = True
