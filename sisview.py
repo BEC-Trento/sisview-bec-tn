@@ -39,6 +39,8 @@ PROG_NAME = 'SISView'
 PROG_COMMENT = 'A tool for a quick visualization of .sis files'
 PROG_VERSION = '0.9.2'
 
+DEFAULT_FOLDER = '/media/bec/Data/SIScam/SIScamProgram/Prog/img' #None
+
 
 #from PyQt4.QtGui import (QApplication, QColumnView, QFileSystemModel,
 #                         QSplitter, QTreeView)
@@ -61,9 +63,10 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
 #        self.rewritePlotWidget()
         self.connectActions()
         
+        self.openFolder(DEFAULT_FOLDER)
         self.currentSis = None
         self.fft_flag = None
-        self.currentFolder = None
+
         self.dockAreasDict = {'Top': QtCore.Qt.TopDockWidgetArea, 'Right': QtCore.Qt.RightDockWidgetArea}
         
     def setupToolbar(self,):
@@ -160,9 +163,14 @@ class Main(QtGui.QMainWindow, Ui_MainWindow):
             dock.setFloating(True)
         self.showNormal()
     
-    def openFolder(self,):
-        folder = QtGui.QFileDialog.getExistingDirectory(self, caption='Open folder',
-                                                        directory=QtCore.QDir.homePath())
+    def openFolder(self, folder=None):
+        if not folder or folder is None:
+            folder = QtGui.QFileDialog.getExistingDirectory(self, caption='Open folder',
+                                           #             directory=QtCore.QDir.homePath(),
+                                                         directory=self.currentFolder,
+                                                        )
+        folder = folder if folder else self.currentFolder
+        print('OPEN:', folder)
         self.currentFolder = folder
         self.treeView.setRootIndex(self.model.index(folder))
     
